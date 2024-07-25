@@ -30,6 +30,10 @@ public class Appointment {
 	@Column(nullable = false)
 	private LocalDateTime appointmentTime;
 
+	@ManyToOne
+	@JoinColumn(name = "idStatus")
+	private Status status;
+
 	public Appointment() {
 	}
 
@@ -39,11 +43,20 @@ public class Appointment {
 		this.appointmentTime = appointmentTime;
 	}
 
-	public Appointment(Long idAppointment, User barber, User client, LocalDateTime appointmentTime) {
+	public Appointment(Long idAppointment, User barber, User client, LocalDateTime appointmentTime, Status status) {
 		this.idAppointment = idAppointment;
 		this.barber = barber;
 		this.client = client;
 		this.appointmentTime = appointmentTime;
+		this.status = status;
+	}
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 	public Long getIdAppointment() {
@@ -83,7 +96,5 @@ public class Appointment {
 		return "Appointment [idAppointment=" + idAppointment + ", barber=" + barber + ", client=" + client
 				+ ", appointmentTime=" + appointmentTime + "]";
 	}
-	
-	
 
 }

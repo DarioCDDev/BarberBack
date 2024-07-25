@@ -4,9 +4,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.barber.dto.AppointmentDTO;
+import com.barber.dto.CreateAppointmentRequest;
 import com.barber.entities.Appointment;
 import com.barber.entities.User;
 import com.barber.service.AppointmentService;
@@ -34,20 +36,13 @@ public class AppointmentController {
     }
 
     @PostMapping("/appointments")
-    public Appointment createAppointment(@RequestBody AppointmentDTO appointmentDTO) {
-        User barber = userService.findUserById(appointmentDTO.getBarberId());
-        User client = userService.findUserById(appointmentDTO.getClientId());
-        Appointment appointment = new Appointment(barber, client, appointmentDTO.getAppointmentTime());
-        return appointmentService.createAppointment(appointment);
+    public ResponseEntity<?> createAppointment(@RequestBody CreateAppointmentRequest appointmentRequest) {
+        User barber = userService.findUserById(appointmentRequest.getAppointment().getBarberId());
+        User client = userService.findUserById(appointmentRequest.getAppointment().getClientId());
+        Appointment appointment = new Appointment(barber, client, appointmentRequest.getAppointment().getAppointmentTime());
+        return appointmentService.createAppointment(appointment, appointmentRequest.getStatusId());
     }
     
-//    @PostMapping("/appointments")
-//    public Appointment createAppointment(@RequestBody Appointment appointment) {
-//    	System.out.println("----------------- hola ----------------");
-////    	System.out.println(appointment);
-//    	
-//        return appointmentService.createAppointment(appointment);
-//    }
 
     @PutMapping("/appointments/{id}")
     public Appointment updateAppointment(@PathVariable Long id, @RequestBody Appointment appointment) {

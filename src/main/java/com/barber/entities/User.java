@@ -6,6 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,15 +27,19 @@ public class User {
 	@Column
 	private String name;
 
-	@Column
+	@Column(unique = true)
 	private String phone;
 
-	@Column
+	@Column(unique = true)
 	private String email;
 
 	@ManyToOne
 	@JoinColumn(name = "idRol")
 	private Rol rol;
+
+	@Column(name = "schedule", nullable = true, columnDefinition = "TEXT")
+	@Convert(converter = ScheduleConverter.class)
+	private Schedule schedule;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "barber")
@@ -63,7 +68,7 @@ public class User {
 	}
 
 	public User(Long idUser, String name, String phone, String email, Rol rol, List<Appointment> appointmentsAsBarber,
-			List<Appointment> appointmentsAsClient) {
+			List<Appointment> appointmentsAsClient, Schedule schedule) {
 		this.idUser = idUser;
 		this.name = name;
 		this.phone = phone;
@@ -71,7 +76,19 @@ public class User {
 		this.rol = rol;
 		this.appointmentsAsBarber = appointmentsAsBarber;
 		this.appointmentsAsClient = appointmentsAsClient;
+		this.schedule = schedule;
 	}
+
+	public User(Long idUser, String name, String phone, String email, Rol rol, Schedule schedule) {
+		this.idUser = idUser;
+		this.name = name;
+		this.phone = phone;
+		this.email = email;
+		this.rol = rol;
+		this.schedule = schedule;
+	}
+
+	// Getters and setters...
 
 	public Long getIdUser() {
 		return idUser;
@@ -129,4 +146,16 @@ public class User {
 		this.appointmentsAsClient = appointmentsAsClient;
 	}
 
+	public Schedule getSchedule() {
+		return schedule;
+	}
+
+	public void setSchedule(Schedule schedule) {
+		this.schedule = schedule;
+	}
+
+//	// Método para validar que el horario se establece solo si el rol es barbero
+//	public boolean isScheduleValid() {
+//		return rol != null && rol.getIdRol() == 1 && schedule != null && !schedule.trim().isEmpty();
+//	}
 }

@@ -17,16 +17,30 @@ import lombok.Data;
 @Table(name = "rol_table")
 @Data
 public class Rol {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long idRol;
 
-	@Column
+	@Column(unique = true)
 	private String name;
-	
+
 	@JsonIgnore
 	@OneToMany(mappedBy = "rol")
-    private List<User> users;
+	private List<User> users;
+
+	public Rol(Long idRol, String name, List<User> users) {
+		this.idRol = idRol;
+		this.name = name;
+		this.users = users;
+	}
+
+	public Rol() {
+	}
+
+	public Rol(Long idRol, String name) {
+		this.idRol = idRol;
+		this.name = name;
+	}
 
 }
