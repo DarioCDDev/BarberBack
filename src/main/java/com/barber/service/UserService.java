@@ -4,7 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.barber.dto.CreateUserRequest;
+import com.barber.entities.Rol;
 import com.barber.entities.User;
+import com.barber.repository.RolRepository;
 import com.barber.repository.UserRepository;
 
 import java.util.List;
@@ -16,10 +19,15 @@ public class UserService {
     
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private RolRepository rolRepository;
 
     // Create a new User
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public User createUser(CreateUserRequest user) {
+    	Rol rol = rolRepository.findById(user.getRol_id()).get();
+    	user.getUser().setRol(rol);
+        return userRepository.save(user.getUser());
     }
 
     // Read a User by ID

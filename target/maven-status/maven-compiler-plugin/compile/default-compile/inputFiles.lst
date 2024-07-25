@@ -1,7 +1,9 @@
 C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\BarberApplication.java
 C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\controller\AppointmentController.java
+C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\controller\RolController.java
 C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\controller\UserController.java
 C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\dto\AppointmentDTO.java
+C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\dto\CreateUserRequest.java
 C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\entities\Appointment.java
 C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\entities\Rol.java
 C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\entities\User.java
@@ -9,4 +11,5 @@ C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com
 C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\repository\RolRepository.java
 C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\repository\UserRepository.java
 C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\service\AppointmentService.java
+C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\service\RolService.java
 C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\service\UserService.java
