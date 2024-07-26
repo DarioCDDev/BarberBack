@@ -5,11 +5,20 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.barber.dto.AppointmentDTO;
 import com.barber.dto.CreateAppointmentRequest;
 import com.barber.entities.Appointment;
+import com.barber.entities.AvailabilityResponse;
 import com.barber.entities.User;
 import com.barber.service.AppointmentService;
 import com.barber.service.UserService;
@@ -19,55 +28,71 @@ import com.barber.service.UserService;
 @RequestMapping("/api/v1")
 public class AppointmentController {
 
-    @Autowired
-    private AppointmentService appointmentService;
-    
-    @Autowired
-    private UserService userService;
+	@Autowired
+	private AppointmentService appointmentService;
 
-    @GetMapping("/appointments")
-    public List<Appointment> getAllAppointments() {
-        return appointmentService.getAllAppointments();
-    }
+	@Autowired
+	private UserService userService;
 
-    @GetMapping("/appointments/{id}")
-    public Appointment getAppointmentById(@PathVariable Long id) {
-        return appointmentService.getAppointmentById(id).orElse(null);
-    }
+	@GetMapping("/appointments")
+	public List<Appointment> getAllAppointments() {
+		return appointmentService.getAllAppointments();
+	}
 
-    @PostMapping("/appointments")
-    public ResponseEntity<?> createAppointment(@RequestBody CreateAppointmentRequest appointmentRequest) {
-        User barber = userService.findUserById(appointmentRequest.getAppointment().getBarberId());
-        User client = userService.findUserById(appointmentRequest.getAppointment().getClientId());
-        Appointment appointment = new Appointment(barber, client, appointmentRequest.getAppointment().getAppointmentTime());
-        return appointmentService.createAppointment(appointment, appointmentRequest.getStatusId());
-    }
-    
+	@GetMapping("/appointments/{id}")
+	public Appointment getAppointmentById(@PathVariable Long id) {
+		return appointmentService.getAppointmentById(id).orElse(null);
+	}
 
-    @PutMapping("/appointments/{id}")
-    public Appointment updateAppointment(@PathVariable Long id, @RequestBody Appointment appointment) {
-        return appointmentService.updateAppointment(id, appointment);
-    }
+	@PostMapping("/appointments")
+	public ResponseEntity<?> createAppointment(@RequestBody CreateAppointmentRequest appointmentRequest) {
+		User barber = userService.findUserById(appointmentRequest.getAppointment().getBarberId());
+		User client = userService.findUserById(appointmentRequest.getAppointment().getClientId());
+		Appointment appointment = new Appointment(barber, client,
+				appointmentRequest.getAppointment().getAppointmentTime());
+		return appointmentService.createAppointment(appointment, appointmentRequest.getStatusId());
+	}
 
-    @DeleteMapping("/appointments/{id}")
-    public void deleteAppointment(@PathVariable Long id) {
-        appointmentService.deleteAppointment(id);
-    }
+	@PutMapping("/appointments/{id}")
+	public Appointment updateAppointment(@PathVariable Long id, @RequestBody Appointment appointment) {
+		return appointmentService.updateAppointment(id, appointment);
+	}
 
-    @GetMapping("/appointments/barber/{barberId}")
-    public List<Appointment> findAppointmentsByBarberId(@PathVariable Long barberId) {
-        return appointmentService.findAppointmentsByBarberId(barberId);
-    }
+	@DeleteMapping("/appointments/{id}")
+	public void deleteAppointment(@PathVariable Long id) {
+		appointmentService.deleteAppointment(id);
+	}
 
-    @GetMapping("/appointments/client/{clientId}")
-    public List<Appointment> findAppointmentsByClientId(@PathVariable Long clientId) {
-        return appointmentService.findAppointmentsByClientId(clientId);
-    }
+	@GetMapping("/appointments/barber")
+	public List<Appointment> findAppointmentsByBarberId(@RequestParam Long barberId) {
+		return appointmentService.findAppointmentsByBarberId(barberId);
+	}
 
-    @GetMapping("/appointments/date-range")
-    public List<Appointment> findAppointmentsByDateRange(
-        @RequestParam("start") LocalDateTime start,
-        @RequestParam("end") LocalDateTime end) {
-        return appointmentService.findAppointmentsByDateRange(start, end);
-    }
+	@GetMapping("/appointments/barber/status")
+	public List<Appointment> findAppointmentsByBarberIdAndStatus(@RequestParam Long barberId,
+			@RequestParam Long statusId) {
+		return appointmentService.findAppointmentsByBarberIdAndStatus(barberId, statusId);
+	}
+
+	@GetMapping("/appointments/client")
+	public List<Appointment> findAppointmentsByClientId(@RequestParam Long clientId) {
+		return appointmentService.findAppointmentsByClientId(clientId);
+	}
+
+	@GetMapping("/appointments/client/status")
+	public List<Appointment> findAppointmentsByClientIdAndStatus(@RequestParam Long clientId,
+			@RequestParam Long statusId) {
+		return appointmentService.findAppointmentsByClientIdAndStatus(clientId, statusId);
+	}
+
+	@GetMapping("/appointments/fullCalendar")
+	public ResponseEntity<AvailabilityResponse> getAvailabilityForBarber(@RequestParam Long barberId) {
+		return appointmentService.getAvailabilityForBarber(barberId);
+	}
+
+	@GetMapping("/appointments/date-range")
+	public List<Appointment> findAppointmentsByDateRange(@RequestParam("start") LocalDateTime start,
+			@RequestParam("end") LocalDateTime end) {
+		return appointmentService.findAppointmentsByDateRange(start, end);
+	}
 }

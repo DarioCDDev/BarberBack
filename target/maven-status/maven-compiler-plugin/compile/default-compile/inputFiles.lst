@@ -1,15 +1,24 @@
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\BarberApplication.java
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\controller\AppointmentController.java
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\controller\RolController.java
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\controller\UserController.java
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\dto\AppointmentDTO.java
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\dto\CreateUserRequest.java
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\entities\Appointment.java
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\entities\Rol.java
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\entities\User.java
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\repository\AppointmentRepository.java
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\repository\RolRepository.java
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\repository\UserRepository.java
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\service\AppointmentService.java
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\service\RolService.java
-C:\Users\a901498\OneDrive - Eviden\Documents\GitHub\BarberBack\src\main\java\com\barber\service\UserService.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\BarberApplication.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\controller\AppointmentController.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\controller\RolController.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\controller\StatusController.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\controller\UserController.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\dto\AppointmentDTO.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\dto\CreateAppointmentRequest.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\dto\CreateUserRequest.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\entities\Appointment.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\entities\AvailabilityResponse.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\entities\Rol.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\entities\Schedule.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\entities\ScheduleConverter.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\entities\Status.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\entities\TimeInterval.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\entities\User.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\repository\AppointmentRepository.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\repository\RolRepository.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\repository\StatusRepository.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\repository\UserRepository.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\service\AppointmentService.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\service\RolService.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\service\StatusService.java
+C:\Users\Dario\Desktop\Carpetas\Programación\Java\WorkSpace\barber\src\main\java\com\barber\service\UserService.java

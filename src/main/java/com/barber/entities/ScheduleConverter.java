@@ -22,6 +22,9 @@ public class ScheduleConverter implements AttributeConverter<Schedule, String> {
 
 	@Override
 	public Schedule convertToEntityAttribute(String dbData) {
+		if (dbData == null || dbData.isEmpty()) {
+			return null; // Maneja el caso en que dbData es nulo o vacío
+		}
 		try {
 			return objectMapper.readValue(dbData, Schedule.class);
 		} catch (JsonProcessingException e) {
