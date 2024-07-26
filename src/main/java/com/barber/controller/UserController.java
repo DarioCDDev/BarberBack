@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.barber.dto.CreateUserRequest;
 import com.barber.entities.User;
 import com.barber.service.UserService;
+
+import io.jsonwebtoken.Claims;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -28,6 +31,11 @@ public class UserController {
 	@GetMapping("/user")
 	public List<User> getAllUsers() {
 		return userService.getAllUsers();
+	}
+	
+	@GetMapping("/user/token")
+	public Claims getAllUsers(@RequestParam String token) {
+		return userService.obtenerClaimsDesdeToken(token);
 	}
 
 	@GetMapping("/user/{id}")

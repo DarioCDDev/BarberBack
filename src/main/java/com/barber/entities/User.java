@@ -33,6 +33,8 @@ public class User {
 	@Column(unique = true)
 	private String email;
 
+	private String password;
+
 	@ManyToOne
 	@JoinColumn(name = "idRol")
 	private Rol rol;
@@ -52,23 +54,25 @@ public class User {
 	public User() {
 	}
 
-	public User(String name, String phone, String email, Rol rol) {
+	public User(String name, String phone, String email, String password, Rol rol) {
 		this.name = name;
 		this.phone = phone;
 		this.email = email;
 		this.rol = rol;
+		this.password = password;
 	}
 
-	public User(Long idUser, String name, String phone, String email, Rol rol) {
+	public User(Long idUser, String name, String phone, String email, String password, Rol rol) {
 		this.idUser = idUser;
 		this.name = name;
 		this.phone = phone;
 		this.email = email;
 		this.rol = rol;
+		this.password = password;
 	}
 
-	public User(Long idUser, String name, String phone, String email, Rol rol, List<Appointment> appointmentsAsBarber,
-			List<Appointment> appointmentsAsClient, Schedule schedule) {
+	public User(Long idUser, String name, String phone, String email, String password, Rol rol,
+			List<Appointment> appointmentsAsBarber, List<Appointment> appointmentsAsClient, Schedule schedule) {
 		this.idUser = idUser;
 		this.name = name;
 		this.phone = phone;
@@ -77,15 +81,17 @@ public class User {
 		this.appointmentsAsBarber = appointmentsAsBarber;
 		this.appointmentsAsClient = appointmentsAsClient;
 		this.schedule = schedule;
+		this.password = password;
 	}
 
-	public User(Long idUser, String name, String phone, String email, Rol rol, Schedule schedule) {
+	public User(Long idUser, String name, String phone, String email, String password, Rol rol, Schedule schedule) {
 		this.idUser = idUser;
 		this.name = name;
 		this.phone = phone;
 		this.email = email;
 		this.rol = rol;
 		this.schedule = schedule;
+		this.password = password;
 	}
 
 	// Getters and setters...
@@ -154,8 +160,12 @@ public class User {
 		this.schedule = schedule;
 	}
 
-//	// Método para validar que el horario se establece solo si el rol es barbero
-//	public boolean isScheduleValid() {
-//		return rol != null && rol.getIdRol() == 1 && schedule != null && !schedule.trim().isEmpty();
-//	}
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 }

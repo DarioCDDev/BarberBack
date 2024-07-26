@@ -74,9 +74,9 @@ public class BarberApplication implements CommandLineRunner {
 
 		Schedule schedule = new Schedule(weeklySchedule);
 
-		User barber = new User(1l, "Darío", "663580414", "dariocd0808@gamil.com", barberRol, schedule);
+		User barber = new User(1l, "Darío", "663580414", "dariocd0808@gamil.com", "", barberRol, schedule);
 
-		User cliente = new User(2l, "Prueba", "123", "123@gamil.com", clienteRol);
+		User cliente = new User(2l, "Prueba", "123", "123@gamil.com","", clienteRol);
 
 		userRepository.save(barber);
 		userRepository.save(cliente);

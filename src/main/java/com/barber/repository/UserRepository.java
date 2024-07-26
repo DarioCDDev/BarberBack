@@ -9,4 +9,6 @@ import com.barber.entities.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 	Optional<User> findByEmail(String email);
 
+	Optional<User> findOneByEmail(String email);
+
 }
