@@ -12,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -33,7 +34,12 @@ public class User {
 	@Column(unique = true)
 	private String email;
 
+	@JsonIgnore
 	private String password;
+
+	@Lob
+	@Column(name = "photo", nullable = true)
+	private byte[] photo;
 
 	@ManyToOne
 	@JoinColumn(name = "idRol")
@@ -166,6 +172,14 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public byte[] getPhoto() {
+		return photo;
+	}
+
+	public void setPhoto(byte[] photo) {
+		this.photo = photo;
 	}
 
 }

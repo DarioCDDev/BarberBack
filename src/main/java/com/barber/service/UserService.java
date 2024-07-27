@@ -1,5 +1,6 @@
 package com.barber.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.barber.dto.CreateUserRequest;
+import com.barber.dto.UserDTO;
 import com.barber.entities.Rol;
 import com.barber.entities.Schedule;
 import com.barber.entities.User;
@@ -91,6 +93,28 @@ public class UserService {
 	// Read a User by ID
 	public User getUserById(Long id) {
 		return userRepository.findById(id).get();
+	}
+
+	public List<UserDTO> getUsersByRol(Long rolId) {
+		List<User> userList = userRepository.findAll();
+		Rol rol = rolRepository.findById(rolId).orElse(null);
+
+		if (rol == null) {
+			return new ArrayList<>();
+		}
+
+		List<UserDTO> userDTOList = new ArrayList<>();
+		for (User user : userList) {
+			if (user.getRol().equals(rol)) {
+				System.out.println(user.getIdUser());
+				UserDTO userDTO = new UserDTO(
+						user.getName(), user.getPhone(), user.getEmail(), user.getPhoto()
+				);
+				userDTOList.add(userDTO);
+			}
+		}
+
+		return userDTOList;
 	}
 
 	// Read all Users
