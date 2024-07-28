@@ -23,6 +23,7 @@ com\barber\service\AppointmentService.class
 com\barber\entities\Status.class
 com\barber\service\RolService.class
 com\barber\repository\UserRepository.class
+com\barber\dto\UserDTO.class
 com\barber\security\AuthCredentials.class
 com\barber\entities\Appointment.class
 com\barber\entities\AvailabilityResponse.class
