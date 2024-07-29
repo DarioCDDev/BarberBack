@@ -41,7 +41,7 @@ public class AppointmentService {
 
 	@Autowired
 	private StatusRepository statusRepository;
-	
+
 	@Autowired
 	private UserRepository userRepository;
 
@@ -217,57 +217,57 @@ public class AppointmentService {
 	}
 
 	public ResponseEntity<AvailabilityResponse> getAvailabilityForBarber(Long barberId) {
-		
-		User barber = userRepository.findById(barberId).get();
+		User barber = userRepository.findById(barberId).orElse(null);
 		if (barber == null || barber.getSchedule() == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
 
-        Schedule barberSchedule = barber.getSchedule();
-        Set<LocalTime> uniqueAvailableTimes = new HashSet<>();
-        LocalDate today = LocalDate.now();
-        LocalDate endDate = today.plusMonths(2);
+		Schedule barberSchedule = barber.getSchedule();
+		Set<LocalTime> uniqueAvailableTimes = new HashSet<>();
+		LocalDate today = LocalDate.now();
+		LocalDate endDate = today.plusMonths(2);
+		List<String> dateTimestamps = new ArrayList<>();
 
-        // Iterar desde hoy hasta dentro de 2 meses
-        for (LocalDate date = today; !date.isAfter(endDate); date = date.plusDays(1)) {
-            String dayOfWeek = date.getDayOfWeek().toString();
-            String normalizedDayOfWeek = dayOfWeek.substring(0, 1) + dayOfWeek.substring(1).toLowerCase();
+		// Iterar desde hoy hasta dentro de 2 meses
+		for (LocalDate date = today; !date.isAfter(endDate); date = date.plusDays(1)) {
+			String dayOfWeek = date.getDayOfWeek().toString();
+			String normalizedDayOfWeek = dayOfWeek.substring(0, 1) + dayOfWeek.substring(1).toLowerCase();
 
-            List<TimeInterval> timeIntervals = barberSchedule.getWeeklySchedule().get(normalizedDayOfWeek);
+			List<TimeInterval> timeIntervals = barberSchedule.getWeeklySchedule().get(normalizedDayOfWeek);
 
-            if (timeIntervals != null) {
-                for (TimeInterval interval : timeIntervals) {
-                    LocalTime startTime = LocalTime.parse(interval.getStartTime());
-                    LocalTime endTime = LocalTime.parse(interval.getEndTime());
-                    
-                    // Añadir horas únicas a la lista (asumiendo intervalos de 30 minutos)
-                    LocalTime slot = startTime;
-                    while (slot.isBefore(endTime)) {
-                        uniqueAvailableTimes.add(slot);
-                        slot = slot.plusMinutes(30);
-                    }
-                }
-            }
-        }
+			if (timeIntervals != null) {
+				// Añadir fecha solo si el barbero trabaja ese día
+				dateTimestamps.add(date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
 
-        // Convertir a las listas requeridas para el objeto de respuesta
-        List<String> dateTimestamps = generateDateTimestamps(today, endDate);
-        List<String> availableTimes = uniqueAvailableTimes.stream()
-                .map(time -> time.format(DateTimeFormatter.ofPattern("HH:mm")))
-                .sorted()
-                .collect(Collectors.toList());
+				for (TimeInterval interval : timeIntervals) {
+					LocalTime startTime = LocalTime.parse(interval.getStartTime());
+					LocalTime endTime = LocalTime.parse(interval.getEndTime());
 
-        AvailabilityResponse response = new AvailabilityResponse(dateTimestamps, availableTimes);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+					// Añadir horas únicas a la lista (asumiendo intervalos de 30 minutos)
+					LocalTime slot = startTime;
+					while (slot.isBefore(endTime)) {
+						uniqueAvailableTimes.add(slot);
+						slot = slot.plusMinutes(30);
+					}
+				}
+			}
+		}
 
-    private List<String> generateDateTimestamps(LocalDate start, LocalDate end) {
-    	List<String> dateStrings = new ArrayList<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
-            dateStrings.add(date.format(formatter));
-        }
-        return dateStrings;
-    }
+		// Convertir a las listas requeridas para el objeto de respuesta
+		List<String> availableTimes = uniqueAvailableTimes.stream()
+				.map(time -> time.format(DateTimeFormatter.ofPattern("HH:mm"))).sorted().collect(Collectors.toList());
+
+		AvailabilityResponse response = new AvailabilityResponse(dateTimestamps, availableTimes);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	private List<String> generateDateTimestamps(LocalDate start, LocalDate end) {
+		List<String> dateStrings = new ArrayList<>();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+			dateStrings.add(date.format(formatter));
+		}
+		return dateStrings;
+	}
 
 }

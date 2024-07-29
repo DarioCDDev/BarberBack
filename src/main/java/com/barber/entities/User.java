@@ -1,6 +1,7 @@
 package com.barber.entities;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,7 +35,7 @@ public class User {
 	@Column(unique = true)
 	private String email;
 
-	@JsonIgnore
+	@Column
 	private String password;
 
 	@Lob
@@ -60,11 +61,30 @@ public class User {
 	public User() {
 	}
 
+	public User(String name, String phone, String email, String password) {
+		this.name = name;
+		this.phone = phone;
+		this.email = email;
+		this.password = password;
+	}
+
 	public User(String name, String phone, String email, String password, Rol rol) {
 		this.name = name;
 		this.phone = phone;
 		this.email = email;
 		this.rol = rol;
+		this.password = password;
+	}
+
+	public User(Long idUser, String name, String phone, String email, String password, Rol rol, Schedule schedule,
+			byte[] photo) {
+		this.idUser = idUser;
+		this.name = name;
+		this.phone = phone;
+		this.email = email;
+		this.photo = photo;
+		this.rol = rol;
+		this.schedule = schedule;
 		this.password = password;
 	}
 
@@ -180,6 +200,14 @@ public class User {
 
 	public void setPhoto(byte[] photo) {
 		this.photo = photo;
+	}
+
+	@Override
+	public String toString() {
+		return "User [idUser=" + idUser + ", name=" + name + ", phone=" + phone + ", email=" + email + ", password="
+				+ password + ", photo=" + Arrays.toString(photo) + ", rol=" + rol + ", schedule=" + schedule
+				+ ", appointmentsAsBarber=" + appointmentsAsBarber + ", appointmentsAsClient=" + appointmentsAsClient
+				+ "]";
 	}
 
 }

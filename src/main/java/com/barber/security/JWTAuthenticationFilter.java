@@ -18,40 +18,37 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-	@Override
-	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-			throws AuthenticationException {
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+            throws AuthenticationException {
 
-		CachedBodyHttpServletRequest cachedRequest;
-		try {
-			cachedRequest = new CachedBodyHttpServletRequest(request);
-			System.out.println(cachedRequest);
-		} catch (IOException e) {
-			throw new AuthenticationServiceException("Could not read request body", e);
-		}
+        if (!request.getMethod().equals("POST")) {
+            throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
+        }
 
-		AuthCredentials authCredentials;
-		try {
-			authCredentials = new ObjectMapper().readValue(cachedRequest.getReader(), AuthCredentials.class);
-		} catch (IOException e) {
-			throw new AuthenticationServiceException("Could not parse authentication credentials", e);
-		}
+        try {
+            AuthCredentials authCredentials = new ObjectMapper()
+                .readValue(request.getInputStream(), AuthCredentials.class);
 
-		UsernamePasswordAuthenticationToken usernamePAT = new UsernamePasswordAuthenticationToken(
-				authCredentials.getEmail(), authCredentials.getPassword(), Collections.emptyList());
-		return getAuthenticationManager().authenticate(usernamePAT);
-	}
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                authCredentials.getEmail(), authCredentials.getPassword(), Collections.emptyList());
 
-	@Override
-	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-	        Authentication authResult) throws IOException, ServletException {
+            return getAuthenticationManager().authenticate(authToken);
+        } catch (IOException e) {
+            throw new AuthenticationServiceException("Could not read request body", e);
+        }
+    }
 
-	    UserDetailsImpl userDetails = (UserDetailsImpl) authResult.getPrincipal();
-	    String token = TokenUtils.createToken(userDetails.getName(), userDetails.getUsername(), userDetails.getRol());
-	    response.addHeader("Authorization", "Bearer " + token);
-	    System.out.println("Generating token for user: " + userDetails.getUsername());
-	    System.out.println("Token: " + token);
-	    chain.doFilter(request, response); 
-	}
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
+            Authentication authResult) throws IOException, ServletException {
 
+        UserDetailsImpl userDetails = (UserDetailsImpl) authResult.getPrincipal();
+        String token = TokenUtils.createToken(userDetails.getName(), userDetails.getUsername(), userDetails.getRol());
+        response.addHeader("Authorization", "Bearer " + token);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write("{\"token\": \"" + token + "\"}");
+        response.getWriter().flush();
+    }
 }

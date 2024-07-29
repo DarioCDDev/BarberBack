@@ -57,6 +57,8 @@ public class UserService {
 				// establecido
 				user.setSchedule(null);
 			}
+			System.out.println("-----------------");
+			System.out.println(createUserRequest);
 
 			boolean isBcryptHash = createUserRequest.getUser().getPassword().matches(bcryptHasgRegex);
 			if (createUserRequest.getUser().getPassword() != null && createUserRequest.getUser().getPassword() != ""
@@ -107,9 +109,8 @@ public class UserService {
 		for (User user : userList) {
 			if (user.getRol().equals(rol)) {
 				System.out.println(user.getIdUser());
-				UserDTO userDTO = new UserDTO(
-						user.getName(), user.getPhone(), user.getEmail(), user.getPhoto()
-				);
+				UserDTO userDTO = new UserDTO(user.getIdUser(), user.getName(), user.getPhone(), user.getEmail(),
+						user.getPhoto());
 				userDTOList.add(userDTO);
 			}
 		}

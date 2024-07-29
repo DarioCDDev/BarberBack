@@ -33,4 +33,11 @@ public class CreateUserRequest {
 	public void setSchedule(Schedule schedule) {
 		this.schedule = schedule;
 	}
+
+	@Override
+	public String toString() {
+		return "CreateUserRequest [rol_id=" + rol_id + ", user=" + user + ", schedule=" + schedule + "]";
+	}
+	
+	
 }
