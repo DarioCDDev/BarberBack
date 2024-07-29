@@ -113,7 +113,7 @@ public class UserController {
 		return userService.updateUser(id, user);
 	}
 
-	@PostMapping("/user")
+	@PostMapping("/register")
 	public User createUser(@RequestBody CreateUserRequest user) {
 		return userService.createUser(user);
 	}
