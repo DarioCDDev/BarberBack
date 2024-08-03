@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -217,57 +218,75 @@ public class AppointmentService {
 	}
 
 	public ResponseEntity<AvailabilityResponse> getAvailabilityForBarber(Long barberId) {
-		User barber = userRepository.findById(barberId).orElse(null);
-		if (barber == null || barber.getSchedule() == null) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		}
+	    User barber = userRepository.findById(barberId).orElse(null);
+	    if (barber == null || barber.getSchedule() == null) {
+	        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+	    }
 
-		Schedule barberSchedule = barber.getSchedule();
-		Set<LocalTime> uniqueAvailableTimes = new HashSet<>();
-		LocalDate today = LocalDate.now();
-		LocalDate endDate = today.plusMonths(2);
-		List<String> dateTimestamps = new ArrayList<>();
+	    Schedule barberSchedule = barber.getSchedule();
+	    LocalDate today = LocalDate.now();
+	    LocalDate endDate = today.plusMonths(2);
+	    List<String> dateTimestamps = new ArrayList<>();
+	    Map<String, List<Map<String, String>>> availability = new HashMap<>();
 
-		// Iterar desde hoy hasta dentro de 2 meses
-		for (LocalDate date = today; !date.isAfter(endDate); date = date.plusDays(1)) {
-			String dayOfWeek = date.getDayOfWeek().toString();
-			String normalizedDayOfWeek = dayOfWeek.substring(0, 1) + dayOfWeek.substring(1).toLowerCase();
+	    // Iterar desde hoy hasta dentro de 2 meses
+	    for (LocalDate date = today; !date.isAfter(endDate); date = date.plusDays(1)) {
+	        String dayOfWeek = date.getDayOfWeek().toString();
+	        String normalizedDayOfWeek = dayOfWeek.substring(0, 1) + dayOfWeek.substring(1).toLowerCase();
 
-			List<TimeInterval> timeIntervals = barberSchedule.getWeeklySchedule().get(normalizedDayOfWeek);
+	        List<TimeInterval> timeIntervals = barberSchedule.getWeeklySchedule().get(normalizedDayOfWeek);
 
-			if (timeIntervals != null) {
-				// Añadir fecha solo si el barbero trabaja ese día
-				dateTimestamps.add(date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+	        if (timeIntervals != null) {
+	            // Añadir fecha solo si el barbero trabaja ese día
+	            String dateStr = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+	            dateTimestamps.add(dateStr);
+	            List<Map<String, String>> dailyAvailability = new ArrayList<>();
 
-				for (TimeInterval interval : timeIntervals) {
-					LocalTime startTime = LocalTime.parse(interval.getStartTime());
-					LocalTime endTime = LocalTime.parse(interval.getEndTime());
+	            for (TimeInterval interval : timeIntervals) {
+	                LocalTime startTime = LocalTime.parse(interval.getStartTime());
+	                LocalTime endTime = LocalTime.parse(interval.getEndTime());
 
-					// Añadir horas únicas a la lista (asumiendo intervalos de 30 minutos)
-					LocalTime slot = startTime;
-					while (slot.isBefore(endTime)) {
-						uniqueAvailableTimes.add(slot);
-						slot = slot.plusMinutes(30);
-					}
-				}
-			}
-		}
+	                // Verificar intervalos de 30 minutos y añadir estado
+	                LocalTime slot = startTime;
+	                while (slot.isBefore(endTime)) {
+	                    LocalDateTime slotDateTime = LocalDateTime.of(date, slot);
+	                    boolean isAvailable = isSlotAvailable(barberId, slotDateTime);
+	                    String status = isAvailable ? "available" : "not available";
 
-		// Convertir a las listas requeridas para el objeto de respuesta
-		List<String> availableTimes = uniqueAvailableTimes.stream()
-				.map(time -> time.format(DateTimeFormatter.ofPattern("HH:mm"))).sorted().collect(Collectors.toList());
+	                    Map<String, String> timeStatus = new HashMap<>();
+	                    timeStatus.put("time", slot.format(DateTimeFormatter.ofPattern("HH:mm")));
+	                    timeStatus.put("status", status);
+	                    dailyAvailability.add(timeStatus);
 
-		AvailabilityResponse response = new AvailabilityResponse(dateTimestamps, availableTimes);
-		return new ResponseEntity<>(response, HttpStatus.OK);
+	                    slot = slot.plusMinutes(30);
+	                }
+	            }
+
+	            availability.put(dateStr, dailyAvailability);
+	        }
+	    }
+
+	    // Ordenar fechas y horas
+	    Map<String, List<Map<String, String>>> sortedAvailability = new LinkedHashMap<>();
+	    dateTimestamps.stream()
+	        .sorted()
+	        .forEach(date -> sortedAvailability.put(date, availability.get(date)));
+
+	    AvailabilityResponse response = new AvailabilityResponse(dateTimestamps, sortedAvailability);
+	    return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	private List<String> generateDateTimestamps(LocalDate start, LocalDate end) {
-		List<String> dateStrings = new ArrayList<>();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
-			dateStrings.add(date.format(formatter));
-		}
-		return dateStrings;
+	private boolean isSlotAvailable(Long barberId, LocalDateTime slotDateTime) {
+	    List<Appointment> appointments = appointmentRepository.findByBarber_IdUser(barberId);
+
+	    for (Appointment appointment : appointments) {
+	        if (appointment.getAppointmentTime().equals(slotDateTime)) {
+	            return false;
+	        }
+	    }
+
+	    return true;
 	}
+
 
 }

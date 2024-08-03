@@ -1,29 +1,31 @@
 package com.barber.entities;
 
 import java.util.List;
+import java.util.Map;
 
 public class AvailabilityResponse {
-	private List<String> dates; // Lista de fechas en formato timestamp
-	private List<String> availableTimes; // Lista de horas disponibles en formato "HH:mm"
+	private List<String> dateTimestamps;
+	private Map<String, List<Map<String, String>>> availability;
 
-	public AvailabilityResponse(List<String> dates, List<String> availableTimes) {
-		this.dates = dates;
-		this.availableTimes = availableTimes;
+	public AvailabilityResponse(List<String> dateTimestamps, Map<String, List<Map<String, String>>> availability) {
+		this.dateTimestamps = dateTimestamps;
+		this.availability = availability;
 	}
 
-	public List<String> getDates() {
-		return dates;
+	public List<String> getDateTimestamps() {
+		return dateTimestamps;
 	}
 
-	public void setDates(List<String> dates) {
-		this.dates = dates;
+	public void setDateTimestamps(List<String> dateTimestamps) {
+		this.dateTimestamps = dateTimestamps;
 	}
 
-	public List<String> getAvailableTimes() {
-		return availableTimes;
+	public Map<String, List<Map<String, String>>> getAvailability() {
+		return availability;
 	}
 
-	public void setAvailableTimes(List<String> availableTimes) {
-		this.availableTimes = availableTimes;
+	public void setAvailability(Map<String, List<Map<String, String>>> availability) {
+		this.availability = availability;
 	}
+
 }
