@@ -278,9 +278,11 @@ public class AppointmentService {
 
 	private boolean isSlotAvailable(Long barberId, LocalDateTime slotDateTime) {
 	    List<Appointment> appointments = appointmentRepository.findByBarber_IdUser(barberId);
-
 	    for (Appointment appointment : appointments) {
-	        if (appointment.getAppointmentTime().equals(slotDateTime)) {
+	    	//Si cocide y el estado es activo, devuevle false, por esta cogida la cita, si alguna falla esta diponible
+	        if (appointment.getAppointmentTime().equals(slotDateTime) && appointment.getStatus().getIdStatus().equals(1l)) {
+	        	System.out.println("false");
+	        	System.out.println(appointment.getStatus());
 	            return false;
 	        }
 	    }

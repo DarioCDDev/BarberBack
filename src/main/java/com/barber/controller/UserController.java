@@ -71,10 +71,10 @@ public class UserController {
 
             // Obtener el rol del usuario. Ajusta esto según cómo obtengas el rol del usuario.
             // Este es un ejemplo simple. Necesitarás ajustar según tu implementación.
-            String email = authCredentials.getEmail();
+            User user = userRepository.findByEmail(authCredentials.getEmail()).get();
 
             // Generar el token JWT
-            String token = TokenUtils.createToken(authentication.getName(), email, rolRepository.findById(2l).get());
+            String token = TokenUtils.createToken(authentication.getName(), user.getEmail(), rolRepository.findById(2l).get(), user.getIdUser());
 
             // Devolver el token en la respuesta
             return ResponseEntity.ok().body("{\"token\": \"" + token + "\"}");
