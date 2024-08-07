@@ -74,7 +74,7 @@ public class UserController {
             User user = userRepository.findByEmail(authCredentials.getEmail()).get();
 
             // Generar el token JWT
-            String token = TokenUtils.createToken(authentication.getName(), user.getEmail(), rolRepository.findById(2l).get(), user.getIdUser());
+            String token = TokenUtils.createToken(user.getName(), user.getEmail(), rolRepository.findById(2l).get(), user.getIdUser(), user.getPhone());
 
             // Devolver el token en la respuesta
             return ResponseEntity.ok().body("{\"token\": \"" + token + "\"}");
@@ -137,18 +137,21 @@ public class UserController {
 
 	@GetMapping("/{id}/photo")
 	public ResponseEntity<byte[]> getPhoto(@PathVariable Long id) {
-		Optional<User> userOptional = userRepository.findById(id);
-		if (userOptional.isPresent()) {
-			User user = userOptional.get();
-			byte[] photo = user.getPhoto();
-			if (photo != null) {
-				return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(photo);
-			} else {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-			}
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-		}
+	    Optional<User> userOptional = userRepository.findById(id);
+	    if (userOptional.isPresent()) {
+	        User user = userOptional.get();
+	        byte[] photo = user.getPhoto();
+	        if (photo != null) {
+	            return ResponseEntity.ok()
+	                .contentType(MediaType.IMAGE_JPEG)
+	                .body(photo);
+	        } else {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+	        }
+	    } else {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+	    }
 	}
+
 
 }

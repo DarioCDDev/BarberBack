@@ -54,6 +54,10 @@ public class UserDetailsImpl implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+    
+    public String getPhone() {
+        return user.getPhone(); // Assuming there's a method getNombre() in User class
+    }
 
     public String getName() {
         return user.getName(); // Assuming there's a method getNombre() in User class
