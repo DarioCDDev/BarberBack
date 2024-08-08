@@ -1,10 +1,14 @@
 package com.barber.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,24 +128,38 @@ public class UserService {
 	}
 
 	// Update an existing User
-	public User updateUser(Long id, User user) {
+	public ResponseEntity<?> updateUser(Long id, User user, String userPassword) {
+		Map<String, Object> response = new HashMap<>();
 
 		Optional<User> _user = userRepository.findById(id);
 		if (_user.isPresent()) {
 			User currentUser = _user.get();
-			if (currentUser.getName() != null) {
+
+			if (user.getName() != null && user.getName() != "") {
 				currentUser.setName(user.getName());
 			}
-			if (currentUser.getEmail() != null) {
-				currentUser.setName(user.getEmail());
+			
+			if (user.getPhone() != null && user.getPhone() != "") {
+				currentUser.setPhone(user.getPhone());
 			}
-			if (currentUser.getPhone() != null) {
-				currentUser.setName(user.getPhone());
+			if ((userPassword != null && user.getPassword() != null) && (userPassword != "" && user.getPassword() != "")) {
+				BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+				if (passwordEncoder.matches(userPassword, currentUser.getPassword())) {
+					if (!passwordEncoder.matches(user.getPassword(), currentUser.getPassword())) {
+						currentUser.setPassword(passwordEncoder.encode(user.getPassword()));
+					}
+				} else {
+					response.put("message", "La contraseña actual no coincide");
+					return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+				}
 			}
-
-			return userRepository.save(currentUser);
+			response.put("data", userRepository.save(currentUser));
+			response.put("message", "Usuario editado con éxito");
+			return new ResponseEntity<>(response, HttpStatus.OK);
 		}
-		return null; // or throw an exception if preferred
+
+		response.put("message", "No se ha podido actualizar los datos");
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 
 	public User findUserById(Long id) {

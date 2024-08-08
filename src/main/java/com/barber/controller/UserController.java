@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.barber.dto.CreateUserRequest;
+import com.barber.dto.UpdateUserDto;
 import com.barber.dto.UserDTO;
 import com.barber.entities.Rol;
 import com.barber.entities.User;
@@ -109,8 +110,8 @@ public class UserController {
 	}
 
 	@PutMapping("/user/{id}")
-	public User updateUser(@PathVariable Long id, @RequestBody User user) {
-		return userService.updateUser(id, user);
+	public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UpdateUserDto userDto) {
+		return userService.updateUser(id, userDto.getUser(), userDto.getNewPassword());
 	}
 
 	@PostMapping("/register")
