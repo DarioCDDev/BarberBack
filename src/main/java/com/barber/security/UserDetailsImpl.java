@@ -30,7 +30,11 @@ public class UserDetailsImpl implements UserDetails {
     public String getUsername() {
         return user.getEmail();
     }
-
+    
+    public Long getIdUser() {
+        return user.getIdUser();
+    }
+    
     @Override
     public boolean isAccountNonExpired() {
         return true;
@@ -49,6 +53,10 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+    
+    public String getPhone() {
+        return user.getPhone(); // Assuming there's a method getNombre() in User class
     }
 
     public String getName() {

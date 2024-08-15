@@ -1,6 +1,7 @@
 package com.barber.controller;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,6 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,9 +27,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.barber.dto.CreateUserRequest;
+import com.barber.dto.UpdateUserDto;
 import com.barber.dto.UserDTO;
+import com.barber.entities.Rol;
 import com.barber.entities.User;
+import com.barber.repository.RolRepository;
 import com.barber.repository.UserRepository;
+import com.barber.security.AuthCredentials;
+import com.barber.security.TokenUtils;
 import com.barber.service.UserService;
 
 import io.jsonwebtoken.Claims;
@@ -38,6 +49,40 @@ public class UserController {
 
 	@Autowired
 	UserRepository userRepository;
+	
+	@Autowired
+	RolRepository rolRepository;
+
+	@Autowired
+	private AuthenticationManager authenticationManager;
+
+	@PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody AuthCredentials authCredentials) {
+        try {
+            // Autenticar al usuario
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authCredentials.getEmail(), 
+                            authCredentials.getPassword()
+                    )
+            );
+
+            // Establecer la autenticación en el contexto de seguridad
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Obtener el rol del usuario. Ajusta esto según cómo obtengas el rol del usuario.
+            // Este es un ejemplo simple. Necesitarás ajustar según tu implementación.
+            User user = userRepository.findByEmail(authCredentials.getEmail()).get();
+
+            // Generar el token JWT
+            String token = TokenUtils.createToken(user.getName(), user.getEmail(), rolRepository.findById(2l).get(), user.getIdUser(), user.getPhone());
+
+            // Devolver el token en la respuesta
+            return ResponseEntity.ok().body("{\"token\": \"" + token + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+    }
 
 	@GetMapping("/user")
 	public List<User> getAllUsers() {
@@ -65,11 +110,11 @@ public class UserController {
 	}
 
 	@PutMapping("/user/{id}")
-	public User updateUser(@PathVariable Long id, @RequestBody User user) {
-		return userService.updateUser(id, user);
+	public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UpdateUserDto userDto) {
+		return userService.updateUser(id, userDto.getUser(), userDto.getNewPassword());
 	}
 
-	@PostMapping("/user")
+	@PostMapping("/register")
 	public User createUser(@RequestBody CreateUserRequest user) {
 		return userService.createUser(user);
 	}
@@ -93,18 +138,21 @@ public class UserController {
 
 	@GetMapping("/{id}/photo")
 	public ResponseEntity<byte[]> getPhoto(@PathVariable Long id) {
-		Optional<User> userOptional = userRepository.findById(id);
-		if (userOptional.isPresent()) {
-			User user = userOptional.get();
-			byte[] photo = user.getPhoto();
-			if (photo != null) {
-				return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(photo);
-			} else {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-			}
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-		}
+	    Optional<User> userOptional = userRepository.findById(id);
+	    if (userOptional.isPresent()) {
+	        User user = userOptional.get();
+	        byte[] photo = user.getPhoto();
+	        if (photo != null) {
+	            return ResponseEntity.ok()
+	                .contentType(MediaType.IMAGE_JPEG)
+	                .body(photo);
+	        } else {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+	        }
+	    } else {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+	    }
 	}
+
 
 }

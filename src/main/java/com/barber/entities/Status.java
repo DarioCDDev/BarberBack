@@ -70,4 +70,9 @@ public class Status {
 		this.appointments = appointments;
 	}
 
+	@Override
+	public String toString() {
+		return "Status [idStatus=" + idStatus + ", name=" + name + "]";
+	}
+
 }

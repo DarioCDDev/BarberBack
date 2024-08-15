@@ -2,6 +2,7 @@ package com.barber.dto;
 
 public class UserDTO {
 
+	private Long userId;
 	private String name;
 	private String phone;
 	private String email;
@@ -10,8 +11,8 @@ public class UserDTO {
 	public UserDTO() {
 	}
 
-	public UserDTO(String name, String phone, String email, byte[] photo) {
-
+	public UserDTO(Long userId, String name, String phone, String email, byte[] photo) {
+		this.userId = userId;
 		this.name = name;
 		this.phone = phone;
 		this.email = email;
@@ -23,6 +24,14 @@ public class UserDTO {
 
 	public String getName() {
 		return name;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long usderId) {
+		this.userId = usderId;
 	}
 
 	public void setName(String name) {
@@ -52,6 +61,5 @@ public class UserDTO {
 	public void setPhoto(byte[] photo) {
 		this.photo = photo;
 	}
-	
 
 }

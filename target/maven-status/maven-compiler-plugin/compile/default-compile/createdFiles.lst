@@ -1,3 +1,4 @@
+com\barber\config\SecurityConfig.class
 com\barber\entities\User.class
 com\barber\service\StatusService.class
 com\barber\repository\RolRepository.class
@@ -12,6 +13,7 @@ com\barber\entities\Rol.class
 com\barber\security\JWTAuthorizationFilter.class
 com\barber\dto\AppointmentDTO.class
 com\barber\entities\Schedule.class
+com\barber\dto\UpdateUserDto.class
 com\barber\security\TokenUtils.class
 com\barber\controller\UserController.class
 com\barber\service\UserService.class
