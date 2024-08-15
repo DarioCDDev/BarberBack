@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -183,6 +184,9 @@ public class AppointmentService {
 			if (appointmentDetails.getAppointmentTime() != null) {
 				existingAppointment.setAppointmentTime(appointmentDetails.getAppointmentTime());
 			}
+			if (appointmentDetails.getStatus() != null) {
+				existingAppointment.setStatus(appointmentDetails.getStatus());
+			}
 
 			return appointmentRepository.save(existingAppointment);
 		}
@@ -205,8 +209,14 @@ public class AppointmentService {
 
 	// Find Appointments by Client ID
 	public List<Appointment> findAppointmentsByClientId(Long clientId) {
-		return appointmentRepository.findByClient_IdUser(clientId);
-	}
+        List<Appointment> appointments = appointmentRepository.findByClient_IdUser(clientId);
+        
+        return appointments.stream()
+            .sorted(Comparator.comparing((Appointment a) -> a.getStatus().getIdStatus() != 1)
+                .thenComparing(Appointment::getAppointmentTime))
+            .limit(10)
+            .collect(Collectors.toList());
+    }
 
 	public List<Appointment> findAppointmentsByClientIdAndStatus(Long clientId, Long statusId) {
 		return appointmentRepository.findByClient_IdUserAndStatus_IdStatus(clientId, statusId);
