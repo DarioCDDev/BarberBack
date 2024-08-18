@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,8 +41,12 @@ public class UserService {
 	@Autowired
 	private RolRepository rolRepository;
 
+	@Autowired
+	private JavaMailSender mailSender;
+
 	public User createUser(CreateUserRequest createUserRequest) {
 		try {
+
 			String bcryptHasgRegex = "\\A\\$2a?\\$\\d\\d\\$[./0-9A-Za-z]{53}";
 			// Obtener el rol basado en el ID proporcionado
 			Rol rol = rolRepository.findById(createUserRequest.getRol_id())
@@ -61,8 +68,6 @@ public class UserService {
 				// establecido
 				user.setSchedule(null);
 			}
-			System.out.println("-----------------");
-			System.out.println(createUserRequest);
 
 			boolean isBcryptHash = createUserRequest.getUser().getPassword().matches(bcryptHasgRegex);
 			if (createUserRequest.getUser().getPassword() != null && createUserRequest.getUser().getPassword() != ""
@@ -71,12 +76,26 @@ public class UserService {
 						.setPassword(new BCryptPasswordEncoder().encode(createUserRequest.getUser().getPassword()));
 			}
 
-			// Guardar el usuario en la base de datos
-			return userRepository.save(user);
+			String verificationCode = RandomStringUtils.randomAlphanumeric(8);
+			user.setVerificationCode(verificationCode);
+			user.setVerified(false);
+			User savedUser = userRepository.save(user);
+
+			sendVerificationEmail(savedUser.getEmail(), verificationCode);
+
+			return savedUser;
 		} catch (Exception e) {
 			throw e;
 		}
 
+	}
+
+	private void sendVerificationEmail(String email, String verificationCode) {
+		SimpleMailMessage message = new SimpleMailMessage();
+		message.setTo(email);
+		message.setSubject("Verifica tu correo electrónico");
+		message.setText("Tu código de verificación es: " + verificationCode);
+		mailSender.send(message);
 	}
 
 	public Claims obtenerClaimsDesdeToken(String token) {
@@ -90,8 +109,6 @@ public class UserService {
 
 			return jws.getBody();
 		} catch (Exception e) {
-			// Manejar la excepción según tus necesidades (puede ser token inválido,
-			// expirado, etc.)
 			throw new RuntimeException("No se pudo obtener los claims del token", e);
 		}
 	}
@@ -138,11 +155,12 @@ public class UserService {
 			if (user.getName() != null && user.getName() != "") {
 				currentUser.setName(user.getName());
 			}
-			
+
 			if (user.getPhone() != null && user.getPhone() != "") {
 				currentUser.setPhone(user.getPhone());
 			}
-			if ((userPassword != null && user.getPassword() != null) && (userPassword != "" && user.getPassword() != "")) {
+			if ((userPassword != null && user.getPassword() != null)
+					&& (userPassword != "" && user.getPassword() != "")) {
 				BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 				if (passwordEncoder.matches(userPassword, currentUser.getPassword())) {
 					if (!passwordEncoder.matches(user.getPassword(), currentUser.getPassword())) {

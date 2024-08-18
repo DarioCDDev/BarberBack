@@ -42,7 +42,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(requests -> requests
-                .requestMatchers("/api/v1/login", "/api/v1/register").permitAll() // Permitir acceso sin autenticación
+                .requestMatchers("/api/v1/login", "/api/v1/register", "/api/v1/public/**").permitAll() // Permitir acceso sin autenticación
                 .requestMatchers("/api/v1/**").authenticated() // Proteger las rutas restantes
                 .anyRequest().permitAll()) // Permitir acceso a cualquier otra solicitud no configurada
             .addFilterBefore(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);

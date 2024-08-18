@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -55,6 +57,9 @@ public class UserController {
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
+	
+	@Autowired
+	private JavaMailSender mailSender;
 
 	@PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthCredentials authCredentials) {
@@ -75,7 +80,7 @@ public class UserController {
             User user = userRepository.findByEmail(authCredentials.getEmail()).get();
 
             // Generar el token JWT
-            String token = TokenUtils.createToken(user.getName(), user.getEmail(), rolRepository.findById(2l).get(), user.getIdUser(), user.getPhone());
+            String token = TokenUtils.createToken(user.getName(), user.getEmail(), user.getRol(), user.getIdUser(), user.getPhone());
 
             // Devolver el token en la respuesta
             return ResponseEntity.ok().body("{\"token\": \"" + token + "\"}");
@@ -101,6 +106,11 @@ public class UserController {
 
 	@GetMapping("/user/rol")
 	public List<UserDTO> getUserByRol(@RequestParam Long rolId) {
+		return userService.getUsersByRol(rolId);
+	}
+	
+	@GetMapping("/public/user/rol")
+	public List<UserDTO> getUserByRolPublic(@RequestParam Long rolId) {
 		return userService.getUsersByRol(rolId);
 	}
 
@@ -153,6 +163,25 @@ public class UserController {
 	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 	    }
 	}
+	
+	 @PostMapping("/verify")
+	    public ResponseEntity<?> verifyUser(@RequestParam String email, @RequestParam String code) {
+	        User user = userRepository.findByEmail(email)
+	                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+	        if (user.getVerificationCode().equals(code)) {
+	            user.setVerified(true);
+	            userRepository.save(user);
+	            SimpleMailMessage message = new SimpleMailMessage();
+	            message.setTo(email);
+	    		message.setSubject("Verifica tu correo electrónico");
+	    		message.setText("Cuenta verificada exitosamente.");
+	    		mailSender.send(message);
+	            return ResponseEntity.ok("Cuenta verificada exitosamente.");
+	        } else {
+	            return ResponseEntity.badRequest().body("Código de verificación incorrecto.");
+	        }
+	    }
 
 
 }

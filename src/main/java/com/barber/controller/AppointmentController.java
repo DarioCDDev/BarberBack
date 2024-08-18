@@ -16,10 +16,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.barber.dto.BarberAppointmentDTO;
 import com.barber.dto.CreateAppointmentRequest;
 import com.barber.entities.Appointment;
 import com.barber.entities.AvailabilityResponse;
+import com.barber.entities.Service;
 import com.barber.entities.User;
+import com.barber.repository.ServiceRepository;
 import com.barber.service.AppointmentService;
 import com.barber.service.UserService;
 
@@ -33,6 +36,9 @@ public class AppointmentController {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private ServiceRepository serviceRepository;
 
 	@GetMapping("/appointments")
 	public List<Appointment> getAllAppointments() {
@@ -46,10 +52,12 @@ public class AppointmentController {
 
 	@PostMapping("/appointments")
 	public ResponseEntity<?> createAppointment(@RequestBody CreateAppointmentRequest appointmentRequest) {
+		System.out.println(appointmentRequest);
 		User barber = userService.findUserById(appointmentRequest.getAppointment().getBarberId());
 		User client = userService.findUserById(appointmentRequest.getAppointment().getClientId());
+		Service service = serviceRepository.findById(appointmentRequest.getServiceId()).get();
 		Appointment appointment = new Appointment(barber, client,
-				appointmentRequest.getAppointment().getAppointmentTime());
+				appointmentRequest.getAppointment().getAppointmentTime(),service,  appointmentRequest.getComment());
 		return appointmentService.createAppointment(appointment, appointmentRequest.getStatusId());
 	}
 
@@ -64,7 +72,7 @@ public class AppointmentController {
 	}
 
 	@GetMapping("/appointments/barber")
-	public List<Appointment> findAppointmentsByBarberId(@RequestParam Long barberId) {
+	public List<BarberAppointmentDTO> findAppointmentsByBarberId(@RequestParam Long barberId) {
 		return appointmentService.findAppointmentsByBarberId(barberId);
 	}
 

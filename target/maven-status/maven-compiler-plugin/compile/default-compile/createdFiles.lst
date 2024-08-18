@@ -1,8 +1,11 @@
+com\barber\repository\ServiceRepository.class
 com\barber\config\SecurityConfig.class
 com\barber\entities\User.class
 com\barber\service\StatusService.class
 com\barber\repository\RolRepository.class
 com\barber\BarberApplication.class
+com\barber\dto\ServiceDTO.class
+com\barber\service\ServiceService.class
 com\barber\controller\RolController.class
 com\barber\security\CachedBodyHttpServletRequest.class
 com\barber\controller\StatusController.class
@@ -17,6 +20,7 @@ com\barber\dto\UpdateUserDto.class
 com\barber\security\TokenUtils.class
 com\barber\controller\UserController.class
 com\barber\service\UserService.class
+com\barber\controller\ServiceController.class
 com\barber\security\UserDetailServiceImpl.class
 com\barber\dto\CreateAppointmentRequest.class
 com\barber\repository\AppointmentRepository.class
@@ -27,9 +31,12 @@ com\barber\service\RolService.class
 com\barber\repository\UserRepository.class
 com\barber\dto\UserDTO.class
 com\barber\security\AuthCredentials.class
+com\barber\dto\BarberAppointmentDTO.class
 com\barber\entities\Appointment.class
 com\barber\entities\AvailabilityResponse.class
+com\barber\entities\Service.class
 com\barber\dto\CreateUserRequest.class
 com\barber\entities\TimeInterval.class
 com\barber\security\JWTAuthenticationFilter.class
 com\barber\controller\AppointmentController.class
+com\barber\dto\StatusDTO.class

@@ -23,6 +23,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.barber.dto.BarberAppointmentDTO;
+import com.barber.dto.ServiceDTO;
+import com.barber.dto.StatusDTO;
+import com.barber.dto.UserDTO;
 import com.barber.entities.Appointment;
 import com.barber.entities.AvailabilityResponse;
 import com.barber.entities.Schedule;
@@ -199,10 +203,57 @@ public class AppointmentService {
 	}
 
 	// Find Appointments by Barber ID
-	public List<Appointment> findAppointmentsByBarberId(Long barberId) {
-		return appointmentRepository.findByBarber_IdUser(barberId);
-	}
+	public List<BarberAppointmentDTO> findAppointmentsByBarberId(Long barberId) {
+	    return appointmentRepository.findByBarber_IdUser(barberId)
+	        .stream()
+	        .map(appointment -> {
+	            BarberAppointmentDTO dto = new BarberAppointmentDTO();
 
+	            // Mapeo de la cita (Appointment)
+	            dto.setIdAppointment(appointment.getIdAppointment());
+
+	            // Mapeo del Barbero
+	            UserDTO barberDTO = new UserDTO();
+	            barberDTO.setUserId(appointment.getBarber().getIdUser());
+	            barberDTO.setName(appointment.getBarber().getName());
+	            barberDTO.setEmail(appointment.getBarber().getEmail());
+	            barberDTO.setPhone(appointment.getBarber().getPhone());
+	            barberDTO.setPhoto(appointment.getBarber().getPhoto());
+	            dto.setBarber(barberDTO);
+
+	            // Mapeo del Cliente
+	            UserDTO clientDTO = new UserDTO();
+	            clientDTO.setUserId(appointment.getClient().getIdUser());
+	            clientDTO.setName(appointment.getClient().getName());
+	            clientDTO.setEmail(appointment.getClient().getEmail());
+	            clientDTO.setPhone(appointment.getClient().getPhone());
+	            clientDTO.setPhoto(appointment.getClient().getPhoto());
+	            dto.setClient(clientDTO);
+
+	            // Mapeo del appointmentTime
+	            dto.setAppointmentTime(appointment.getAppointmentTime());
+
+	            // Mapeo del Estado (Status)
+	            StatusDTO statusDTO = new StatusDTO();
+	            statusDTO.setIdStatus(appointment.getStatus().getIdStatus());
+	            statusDTO.setName(appointment.getStatus().getName());
+	            dto.setStatus(statusDTO);
+
+	            // Mapeo del Servicio (Service)
+	            ServiceDTO serviceDTO = new ServiceDTO();
+	            serviceDTO.setIdService(appointment.getService().getIdService());
+	            serviceDTO.setName(appointment.getService().getName());
+	            serviceDTO.setPrice(appointment.getService().getPrice());
+	            dto.setService(serviceDTO);
+
+	            // Mapeo de comentarios
+	            dto.setComments(appointment.getComments());
+
+	            return dto;
+	        })
+	        .collect(Collectors.toList());
+	}
+	
 	public List<Appointment> findAppointmentsByBarberIdAndStatus(Long barberId, Long statusId) {
 		return appointmentRepository.findByBarber_IdUserAndStatus_IdStatus(barberId, statusId);
 	}
@@ -289,12 +340,10 @@ public class AppointmentService {
 	private boolean isSlotAvailable(Long barberId, LocalDateTime slotDateTime) {
 	    List<Appointment> appointments = appointmentRepository.findByBarber_IdUser(barberId);
 	    for (Appointment appointment : appointments) {
-	    	//Si cocide y el estado es activo, devuevle false, por esta cogida la cita, si alguna falla esta diponible
-	        if (appointment.getAppointmentTime().equals(slotDateTime) && appointment.getStatus().getIdStatus().equals(1l)) {
-	        	System.out.println("false");
-	        	System.out.println(appointment.getStatus());
-	            return false;
+	        if (appointment.getAppointmentTime().equals(slotDateTime) && (appointment.getStatus().getIdStatus().equals(1l) || appointment.getStatus().getIdStatus().equals(4l))) {
+	        	return false;
 	        }
+	       
 	    }
 
 	    return true;
