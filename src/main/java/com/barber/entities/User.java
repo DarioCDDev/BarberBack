@@ -38,6 +38,11 @@ public class User {
 	@Column
 	private String password;
 
+	@Column
+	private boolean verified = false;
+	@Column
+	private String verificationCode;
+
 	@Lob
 	@Column(name = "photo", nullable = true)
 	private byte[] photo;
@@ -200,6 +205,22 @@ public class User {
 
 	public void setPhoto(byte[] photo) {
 		this.photo = photo;
+	}
+
+	public boolean isVerified() {
+		return verified;
+	}
+
+	public void setVerified(boolean verified) {
+		this.verified = verified;
+	}
+
+	public String getVerificationCode() {
+		return verificationCode;
+	}
+
+	public void setVerificationCode(String verificationCode) {
+		this.verificationCode = verificationCode;
 	}
 
 	@Override

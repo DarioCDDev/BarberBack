@@ -34,21 +34,41 @@ public class Appointment {
 	@JoinColumn(name = "idStatus")
 	private Status status;
 
+	@ManyToOne
+	@JoinColumn(name = "service_id", nullable = false)
+	private Service service;
+
+	@Column(length = 500) // Puedes ajustar el tamaño según sea necesario
+	private String comments;
+
 	public Appointment() {
 	}
 
-	public Appointment(User barber, User client, LocalDateTime appointmentTime) {
+	public Appointment(User barber, User client, LocalDateTime appointmentTime, Service service) {
 		this.barber = barber;
 		this.client = client;
 		this.appointmentTime = appointmentTime;
+		this.service = service;
 	}
 
-	public Appointment(Long idAppointment, User barber, User client, LocalDateTime appointmentTime, Status status) {
+	public Appointment(Long idAppointment, User barber, User client, LocalDateTime appointmentTime, Status status,
+			Service service, String comments) {
 		this.idAppointment = idAppointment;
 		this.barber = barber;
 		this.client = client;
 		this.appointmentTime = appointmentTime;
 		this.status = status;
+		this.service = service;
+		this.comments = comments;
+	}
+
+	public Appointment(User barber, User client, LocalDateTime appointmentTime, Service service,
+			String comments) {
+		this.barber = barber;
+		this.client = client;
+		this.appointmentTime = appointmentTime;
+		this.service = service;
+		this.comments = comments;
 	}
 
 	public Status getStatus() {
@@ -91,10 +111,27 @@ public class Appointment {
 		this.appointmentTime = appointmentTime;
 	}
 
+	public Service getService() {
+		return service;
+	}
+
+	public void setService(Service service) {
+		this.service = service;
+	}
+
+	public String getComments() {
+		return comments;
+	}
+
+	public void setComments(String comments) {
+		this.comments = comments;
+	}
+
 	@Override
 	public String toString() {
 		return "Appointment [idAppointment=" + idAppointment + ", barber=" + barber + ", client=" + client
-				+ ", appointmentTime=" + appointmentTime + "]";
+				+ ", appointmentTime=" + appointmentTime + ", status=" + status + ", service=" + service + ", comments="
+				+ comments + "]";
 	}
 
 }
