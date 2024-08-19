@@ -206,6 +206,8 @@ public class User {
 	public void setPhoto(byte[] photo) {
 		this.photo = photo;
 	}
+	
+	
 
 	public boolean isVerified() {
 		return verified;

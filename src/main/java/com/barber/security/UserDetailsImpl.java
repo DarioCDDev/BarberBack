@@ -54,6 +54,9 @@ public class UserDetailsImpl implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+    public boolean getVerfy() {
+    	return user.isVerified();
+    }
     
     public String getPhone() {
         return user.getPhone(); // Assuming there's a method getNombre() in User class

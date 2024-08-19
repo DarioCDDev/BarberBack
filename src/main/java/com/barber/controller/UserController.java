@@ -2,7 +2,9 @@ package com.barber.controller;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,43 +53,41 @@ public class UserController {
 
 	@Autowired
 	UserRepository userRepository;
-	
+
 	@Autowired
 	RolRepository rolRepository;
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
-	
+
 	@Autowired
 	private JavaMailSender mailSender;
 
 	@PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthCredentials authCredentials) {
-        try {
-            // Autenticar al usuario
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            authCredentials.getEmail(), 
-                            authCredentials.getPassword()
-                    )
-            );
+	public ResponseEntity<?> login(@RequestBody AuthCredentials authCredentials) {
+		try {
+			// Autenticar al usuario
+			Authentication authentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(authCredentials.getEmail(), authCredentials.getPassword()));
 
-            // Establecer la autenticación en el contexto de seguridad
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+			// Establecer la autenticación en el contexto de seguridad
+			SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // Obtener el rol del usuario. Ajusta esto según cómo obtengas el rol del usuario.
-            // Este es un ejemplo simple. Necesitarás ajustar según tu implementación.
-            User user = userRepository.findByEmail(authCredentials.getEmail()).get();
+			// Obtener el rol del usuario. Ajusta esto según cómo obtengas el rol del
+			// usuario.
+			// Este es un ejemplo simple. Necesitarás ajustar según tu implementación.
+			User user = userRepository.findByEmail(authCredentials.getEmail()).get();
 
-            // Generar el token JWT
-            String token = TokenUtils.createToken(user.getName(), user.getEmail(), user.getRol(), user.getIdUser(), user.getPhone());
+			// Generar el token JWT
+			String token = TokenUtils.createToken(user.getName(), user.getEmail(), user.getRol(), user.getIdUser(),
+					user.getPhone(), user.isVerified());
 
-            // Devolver el token en la respuesta
-            return ResponseEntity.ok().body("{\"token\": \"" + token + "\"}");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-        }
-    }
+			// Devolver el token en la respuesta
+			return ResponseEntity.ok().body("{\"token\": \"" + token + "\"}");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+		}
+	}
 
 	@GetMapping("/user")
 	public List<User> getAllUsers() {
@@ -108,7 +108,7 @@ public class UserController {
 	public List<UserDTO> getUserByRol(@RequestParam Long rolId) {
 		return userService.getUsersByRol(rolId);
 	}
-	
+
 	@GetMapping("/public/user/rol")
 	public List<UserDTO> getUserByRolPublic(@RequestParam Long rolId) {
 		return userService.getUsersByRol(rolId);
@@ -148,40 +148,74 @@ public class UserController {
 
 	@GetMapping("/{id}/photo")
 	public ResponseEntity<byte[]> getPhoto(@PathVariable Long id) {
-	    Optional<User> userOptional = userRepository.findById(id);
-	    if (userOptional.isPresent()) {
-	        User user = userOptional.get();
-	        byte[] photo = user.getPhoto();
-	        if (photo != null) {
-	            return ResponseEntity.ok()
-	                .contentType(MediaType.IMAGE_JPEG)
-	                .body(photo);
-	        } else {
-	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-	        }
-	    } else {
-	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-	    }
+		Optional<User> userOptional = userRepository.findById(id);
+		if (userOptional.isPresent()) {
+			User user = userOptional.get();
+			byte[] photo = user.getPhoto();
+			if (photo != null) {
+				return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(photo);
+			} else {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+			}
+		} else {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+		}
 	}
-	
-	 @PostMapping("/verify")
-	    public ResponseEntity<?> verifyUser(@RequestParam String email, @RequestParam String code) {
-	        User user = userRepository.findByEmail(email)
-	                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-	        if (user.getVerificationCode().equals(code)) {
-	            user.setVerified(true);
-	            userRepository.save(user);
-	            SimpleMailMessage message = new SimpleMailMessage();
-	            message.setTo(email);
-	    		message.setSubject("Verifica tu correo electrónico");
-	    		message.setText("Cuenta verificada exitosamente.");
-	    		mailSender.send(message);
-	            return ResponseEntity.ok("Cuenta verificada exitosamente.");
-	        } else {
-	            return ResponseEntity.badRequest().body("Código de verificación incorrecto.");
-	        }
-	    }
+	@PostMapping("/verify")
+	public ResponseEntity<?> verifyUser(@RequestBody Map<String, String> request) {
+		String email = request.get("email");
+		String code = request.get("code");
 
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+		if (user.getVerificationCode().equals(code)) {
+			user.setVerified(true);
+			userRepository.save(user);
+
+			String newToken = TokenUtils.createToken(user.getName(), user.getEmail(), user.getRol(), user.getIdUser(),
+					user.getPhone(), true);
+
+			SimpleMailMessage message = new SimpleMailMessage();
+			message.setTo(email);
+			message.setSubject("Verifica tu correo electrónico");
+			message.setText("Cuenta verificada exitosamente.");
+			mailSender.send(message);
+
+			Map<String, Object> response = new HashMap<>();
+			response.put("message", "Cuenta verificada exitosamente.");
+			response.put("token", newToken);
+
+			return ResponseEntity.ok(response);
+		} else {
+			return ResponseEntity.badRequest().body("Código de verificación incorrecto.");
+		}
+	}
+
+	@GetMapping("/public/resendcode")
+	public ResponseEntity<?> resendCode(@RequestParam String email) {
+		System.out.println(email);
+
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+		try {
+			SimpleMailMessage message = new SimpleMailMessage();
+			message.setTo(email);
+			message.setSubject("Verifica tu correo electrónico");
+			message.setText("Tu código de verificación es: " + user.getVerificationCode());
+			mailSender.send(message);
+
+			Map<String, Object> response = new HashMap<>();
+			response.put("message", "Codigo enviado");
+
+			return ResponseEntity.ok(response);
+
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body("Código de verificación incorrecto.");
+		}
+
+	}
 
 }

@@ -55,8 +55,8 @@ public class BarberApplication implements CommandLineRunner {
 
 		Status activoStatus = new Status(1l, "Activo");
 		Status eliminadoStatus = new Status(2l, "Eliminado");
-		Status pasadoStatus = new Status(3l, "Pasado automatico");
-		Status DoneStatus = new Status(4l, "Hecho");
+		Status pasadoStatus = new Status(3l, "Hecha");
+		Status DoneStatus = new Status(4l, "Completada");
 
 		statusRepository.save(activoStatus);
 		statusRepository.save(eliminadoStatus);
@@ -91,7 +91,7 @@ public class BarberApplication implements CommandLineRunner {
 
 		Schedule schedule = new Schedule(weeklySchedule);
 		
-		User barber1 = new User(1l, "Barbero 1", "663580414141", "barbero1@gmail.com", "$2a$10$zbgTKjwn3iEKH4jntXLfL.KpNHYyk4mnuHEhYbU9Pej6afhkLx4wK", barberRol, schedule);
+		User barber1 = new User(1l, "Barbero 1", "663580414141", "dariocd0808@gmail.com", "$2a$10$zbgTKjwn3iEKH4jntXLfL.KpNHYyk4mnuHEhYbU9Pej6afhkLx4wK", barberRol, schedule);
 		barber1.setVerified(true);
 		User barber2 = new User(2l, "Barbero 2", "663580414142", "barbero2@gmail.com", "$2a$10$zbgTKjwn3iEKH4jntXLfL.KpNHYyk4mnuHEhYbU9Pej6afhkLx4wK", barberRol, schedule);
 		barber2.setVerified(true);

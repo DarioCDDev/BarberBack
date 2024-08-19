@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -50,6 +53,10 @@ public class AppointmentService {
 
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private JavaMailSender mailSender;
+	
+	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM 'de' yyyy 'a las' HH:mm", new Locale("es", "ES"));
 
 	public ResponseEntity<?> createAppointment(Appointment appointment, Long statusId) {
 		Map<String, Object> response = new HashMap<>();
@@ -61,13 +68,13 @@ public class AppointmentService {
 			}
 
 			// Verificar disponibilidad de la hora de la cita
-			List<Appointment> allAppointments = appointmentRepository.findAll();
-			for (Appointment existingAppointment : allAppointments) {
-				if (appointment.getAppointmentTime().equals(existingAppointment.getAppointmentTime())) {
-					response.put("message", "Error, esa hora ya está ocupada");
-					return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-				}
-			}
+//			List<Appointment> allAppointments = appointmentRepository.findAll();
+//			for (Appointment existingAppointment : allAppointments) {
+//				if (appointment.getAppointmentTime().equals(existingAppointment.getAppointmentTime())) {
+//					response.put("message", "Error, esa hora ya está ocupada");
+//					return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+//				}
+//			}
 
 			// Verificar citas existentes del cliente
 			List<Appointment> clientAppointments = appointment.getClient().getAppointmentsAsClient();
@@ -96,6 +103,24 @@ public class AppointmentService {
 			appointment.setStatus(status);
 			response.put("data", appointmentRepository.save(appointment));
 			response.put("message", "Cita creada con éxito");
+			SimpleMailMessage message = new SimpleMailMessage();
+			
+			// Formatear la fecha y hora de la cita en español
+			String formattedDateTime = appointment.getAppointmentTime().format(formatter);
+
+			// Mensaje para el barbero
+			message.setTo(barber.getEmail());
+			message.setSubject("Nueva cita");
+			String barberMessage = "Nueva cita con el cliente: " + appointment.getClient().getName() + ", a fecha de: " + formattedDateTime;
+			message.setText(barberMessage);
+			mailSender.send(message);
+
+			// Mensaje para el cliente
+			message.setTo(appointment.getClient().getEmail());
+			message.setSubject("Nueva cita");
+			String clientMessage = "Cita creada con éxito con el barbero: " + barber.getName() + ", a fecha de: " + formattedDateTime;
+			message.setText(clientMessage);
+			mailSender.send(message);
 			return new ResponseEntity<>(response, HttpStatus.OK);
 
 		} catch (Exception e) {
@@ -171,10 +196,12 @@ public class AppointmentService {
 	public List<Appointment> getAllAppointments() {
 		return appointmentRepository.findAll();
 	}
+	
 
 	// Update an existing Appointment
 	public Appointment updateAppointment(Long id, Appointment appointmentDetails) {
 		Optional<Appointment> existingAppointmentOpt = appointmentRepository.findById(id);
+		SimpleMailMessage message = new SimpleMailMessage();
 
 		if (existingAppointmentOpt.isPresent()) {
 			Appointment existingAppointment = existingAppointmentOpt.get();
@@ -190,6 +217,56 @@ public class AppointmentService {
 			}
 			if (appointmentDetails.getStatus() != null) {
 				existingAppointment.setStatus(appointmentDetails.getStatus());
+				if (appointmentDetails.getStatus().getIdStatus() == 2l) {
+					// Formatear la fecha y hora de la cita en español
+					String formattedDateTime = appointmentDetails.getAppointmentTime().format(formatter);
+					// Mensaje para el barbero
+					message.setTo(appointmentDetails.getBarber().getEmail());
+					message.setSubject("Cita cancelada");
+					String barberMessage = "Estimado/a " + appointmentDetails.getBarber().getName()+ ",\n\n"
+	                         + "Le informamos que el cliente " + appointmentDetails.getClient().getName() + " ha cancelado la cita programada para el " + formattedDateTime + ".\n\n"
+	                         + "Saludos cordiales,\n"
+	                         + "El equipo de [Nombre del Barbería]";
+					message.setText(barberMessage);
+					mailSender.send(message);
+				}
+				if (appointmentDetails.getStatus().getIdStatus() == 3l) {
+					// Formatear la fecha y hora de la cita en español
+					String formattedDateTime = appointmentDetails.getAppointmentTime().format(formatter);
+					// Mensaje para el barbero
+					message.setTo(appointmentDetails.getBarber().getEmail());
+					message.setSubject("Cita marcada como hecha automaticamnte");
+					String barberMessage = "Estimado/a "+ appointmentDetails.getBarber().getName()+",\n\n"
+	                         + "La siguiente cita ha sido marcada como 'Hecha' automáticamente:\n\n"
+	                         + "Cliente: " + appointmentDetails.getClient().getName() + "\n"
+	                         + "Fecha y hora: " + formattedDateTime + "\n\n"
+	                         + "Por favor, confirme la cita manualmente en el sistema para proceder a marcarla como 'Completada'.\n\n"
+	                         + "Saludos cordiales,\n"
+	                         + "El equipo de [Nombre del Barbería]";
+					message.setText(barberMessage);
+					mailSender.send(message);
+				}
+				if (appointmentDetails.getStatus().getIdStatus() == 4l) {
+				    // Formatear la fecha y hora de la cita en español
+				    String formattedDateTime = appointmentDetails.getAppointmentTime().format(formatter);
+				    
+				    // Mensaje para el cliente
+				    message.setTo(appointmentDetails.getClient().getEmail());
+				    message.setSubject("¡Cita completada con éxito!");
+				    
+				    // Crear mensaje más formal y amable
+				    String barberMessage = "Estimado/a " + appointmentDetails.getClient().getName() + ",\n\n"
+				                         + "Nos complace informarle que su cita el " + formattedDateTime + " se ha completado exitosamente.\n\n"
+				                         + "Esperamos que haya tenido una experiencia agradable con nosotros. Le invitamos a agendar su próxima cita en cualquier momento que lo desee.\n\n"
+				                         + "Además, si su experiencia fue satisfactoria, nos encantaría que compartiera su opinión dejando una reseña en el siguiente enlace: [aquí iría el sitio de la reseña].\n\n"
+				                         + "¡Gracias por confiar en nosotros!\n"
+				                         + "Saludos cordiales,\n"
+				                         + "El equipo de [Nombre del Barbería]";
+				    
+				    message.setText(barberMessage);
+				    mailSender.send(message);
+				}
+				
 			}
 
 			return appointmentRepository.save(existingAppointment);
