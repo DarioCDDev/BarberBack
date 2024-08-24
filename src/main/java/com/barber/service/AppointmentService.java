@@ -200,7 +200,10 @@ public class AppointmentService {
 
 	// Update an existing Appointment
 	public Appointment updateAppointment(Long id, Appointment appointmentDetails) {
+		System.out.println(id);
+		System.out.println(appointmentDetails.getStatus());
 		Optional<Appointment> existingAppointmentOpt = appointmentRepository.findById(id);
+		System.out.println(existingAppointmentOpt.isPresent());
 		SimpleMailMessage message = new SimpleMailMessage();
 
 		if (existingAppointmentOpt.isPresent()) {
@@ -218,13 +221,11 @@ public class AppointmentService {
 			if (appointmentDetails.getStatus() != null) {
 				existingAppointment.setStatus(appointmentDetails.getStatus());
 				if (appointmentDetails.getStatus().getIdStatus() == 2l) {
-					// Formatear la fecha y hora de la cita en español
-					String formattedDateTime = appointmentDetails.getAppointmentTime().format(formatter);
-					// Mensaje para el barbero
-					message.setTo(appointmentDetails.getBarber().getEmail());
+					String formattedDateTime = existingAppointment.getAppointmentTime().format(formatter);
+					message.setTo(existingAppointment.getBarber().getEmail());
 					message.setSubject("Cita cancelada");
-					String barberMessage = "Estimado/a " + appointmentDetails.getBarber().getName()+ ",\n\n"
-	                         + "Le informamos que el cliente " + appointmentDetails.getClient().getName() + " ha cancelado la cita programada para el " + formattedDateTime + ".\n\n"
+					String barberMessage = "Estimado/a " + existingAppointment.getBarber().getName()+ ",\n\n"
+	                         + "Le informamos que el cliente " + existingAppointment.getClient().getName() + " ha cancelado la cita programada para el " + formattedDateTime + ".\n\n"
 	                         + "Saludos cordiales,\n"
 	                         + "El equipo de [Nombre del Barbería]";
 					message.setText(barberMessage);
@@ -232,13 +233,13 @@ public class AppointmentService {
 				}
 				if (appointmentDetails.getStatus().getIdStatus() == 3l) {
 					// Formatear la fecha y hora de la cita en español
-					String formattedDateTime = appointmentDetails.getAppointmentTime().format(formatter);
+					String formattedDateTime = existingAppointment.getAppointmentTime().format(formatter);
 					// Mensaje para el barbero
-					message.setTo(appointmentDetails.getBarber().getEmail());
+					message.setTo(existingAppointment.getBarber().getEmail());
 					message.setSubject("Cita marcada como hecha automaticamnte");
-					String barberMessage = "Estimado/a "+ appointmentDetails.getBarber().getName()+",\n\n"
+					String barberMessage = "Estimado/a "+ existingAppointment.getBarber().getName()+",\n\n"
 	                         + "La siguiente cita ha sido marcada como 'Hecha' automáticamente:\n\n"
-	                         + "Cliente: " + appointmentDetails.getClient().getName() + "\n"
+	                         + "Cliente: " + existingAppointment.getClient().getName() + "\n"
 	                         + "Fecha y hora: " + formattedDateTime + "\n\n"
 	                         + "Por favor, confirme la cita manualmente en el sistema para proceder a marcarla como 'Completada'.\n\n"
 	                         + "Saludos cordiales,\n"
@@ -248,14 +249,14 @@ public class AppointmentService {
 				}
 				if (appointmentDetails.getStatus().getIdStatus() == 4l) {
 				    // Formatear la fecha y hora de la cita en español
-				    String formattedDateTime = appointmentDetails.getAppointmentTime().format(formatter);
+				    String formattedDateTime = existingAppointment.getAppointmentTime().format(formatter);
 				    
 				    // Mensaje para el cliente
-				    message.setTo(appointmentDetails.getClient().getEmail());
+				    message.setTo(existingAppointment.getClient().getEmail());
 				    message.setSubject("¡Cita completada con éxito!");
 				    
 				    // Crear mensaje más formal y amable
-				    String barberMessage = "Estimado/a " + appointmentDetails.getClient().getName() + ",\n\n"
+				    String barberMessage = "Estimado/a " + existingAppointment.getClient().getName() + ",\n\n"
 				                         + "Nos complace informarle que su cita el " + formattedDateTime + " se ha completado exitosamente.\n\n"
 				                         + "Esperamos que haya tenido una experiencia agradable con nosotros. Le invitamos a agendar su próxima cita en cualquier momento que lo desee.\n\n"
 				                         + "Además, si su experiencia fue satisfactoria, nos encantaría que compartiera su opinión dejando una reseña en el siguiente enlace: [aquí iría el sitio de la reseña].\n\n"

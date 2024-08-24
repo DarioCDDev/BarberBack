@@ -62,6 +62,15 @@ public class UserController {
 
 	@Autowired
 	private JavaMailSender mailSender;
+	
+	@GetMapping("/public/healtcheck")
+	public ResponseEntity<?> Healtcheck () {
+		try {
+			return ResponseEntity.ok().body("ok");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
+	}
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody AuthCredentials authCredentials) {

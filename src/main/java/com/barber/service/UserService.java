@@ -23,6 +23,7 @@ import com.barber.entities.Schedule;
 import com.barber.entities.User;
 import com.barber.repository.RolRepository;
 import com.barber.repository.UserRepository;
+import com.barber.security.TokenUtils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -149,6 +150,7 @@ public class UserService {
 		Map<String, Object> response = new HashMap<>();
 
 		Optional<User> _user = userRepository.findById(id);
+		
 		if (_user.isPresent()) {
 			User currentUser = _user.get();
 
@@ -171,7 +173,10 @@ public class UserService {
 					return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 				}
 			}
-			response.put("data", userRepository.save(currentUser));
+			userRepository.save(currentUser);
+			String token = TokenUtils.createToken(currentUser.getName(), currentUser.getEmail(), currentUser.getRol(), currentUser.getIdUser(),
+					currentUser.getPhone(), currentUser.isVerified());
+			response.put("data", token);
 			response.put("message", "Usuario editado con éxito");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		}
