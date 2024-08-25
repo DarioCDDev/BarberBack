@@ -357,16 +357,24 @@ public class AppointmentService {
 	}
 
 	public ResponseEntity<AvailabilityResponse> getAvailabilityForBarber(Long barberId) {
-	    User barber = userRepository.findById(barberId).orElse(null);
-	    if (barber == null || barber.getSchedule() == null) {
+	    // Obtener el barbero con el horario en una sola consulta
+	    Optional<User> barberOpt = userRepository.findById(barberId);
+	    if (barberOpt.isEmpty() || barberOpt.get().getSchedule() == null) {
 	        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 	    }
 
-	    Schedule barberSchedule = barber.getSchedule();
+	    Schedule barberSchedule = barberOpt.get().getSchedule();
 	    LocalDate today = LocalDate.now();
 	    LocalDate endDate = today.plusMonths(2);
-	    List<String> dateTimestamps = new ArrayList<>();
-	    Map<String, List<Map<String, String>>> availability = new HashMap<>();
+
+	    // Pre-cargar citas del barbero para evitar múltiples consultas dentro del bucle
+	    List<Appointment> barberAppointments = appointmentRepository.findByBarber_IdUser(barberId);
+	    Set<LocalDateTime> unavailableSlots = barberAppointments.stream()
+	        .filter(appointment -> appointment.getStatus().getIdStatus().equals(1L) || appointment.getStatus().getIdStatus().equals(4L))
+	        .map(Appointment::getAppointmentTime)
+	        .collect(Collectors.toSet());
+
+	    Map<String, List<Map<String, String>>> availability = new LinkedHashMap<>();
 
 	    // Iterar desde hoy hasta dentro de 2 meses
 	    for (LocalDate date = today; !date.isAfter(endDate); date = date.plusDays(1)) {
@@ -374,58 +382,35 @@ public class AppointmentService {
 	        String normalizedDayOfWeek = dayOfWeek.substring(0, 1) + dayOfWeek.substring(1).toLowerCase();
 
 	        List<TimeInterval> timeIntervals = barberSchedule.getWeeklySchedule().get(normalizedDayOfWeek);
-
 	        if (timeIntervals != null) {
-	            // Añadir fecha solo si el barbero trabaja ese día
-	            String dateStr = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-	            dateTimestamps.add(dateStr);
 	            List<Map<String, String>> dailyAvailability = new ArrayList<>();
-
 	            for (TimeInterval interval : timeIntervals) {
 	                LocalTime startTime = LocalTime.parse(interval.getStartTime());
 	                LocalTime endTime = LocalTime.parse(interval.getEndTime());
 
 	                // Verificar intervalos de 30 minutos y añadir estado
-	                LocalTime slot = startTime;
-	                while (slot.isBefore(endTime)) {
+	                for (LocalTime slot = startTime; slot.isBefore(endTime); slot = slot.plusMinutes(30)) {
 	                    LocalDateTime slotDateTime = LocalDateTime.of(date, slot);
-	                    boolean isAvailable = isSlotAvailable(barberId, slotDateTime);
-	                    String status = isAvailable ? "available" : "not available";
+	                    String status = unavailableSlots.contains(slotDateTime) ? "not available" : "available";
 
 	                    Map<String, String> timeStatus = new HashMap<>();
 	                    timeStatus.put("time", slot.format(DateTimeFormatter.ofPattern("HH:mm")));
 	                    timeStatus.put("status", status);
 	                    dailyAvailability.add(timeStatus);
-
-	                    slot = slot.plusMinutes(30);
 	                }
 	            }
-
+	            String dateStr = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 	            availability.put(dateStr, dailyAvailability);
 	        }
 	    }
 
-	    // Ordenar fechas y horas
-	    Map<String, List<Map<String, String>>> sortedAvailability = new LinkedHashMap<>();
-	    dateTimestamps.stream()
-	        .sorted()
-	        .forEach(date -> sortedAvailability.put(date, availability.get(date)));
+	    // Convertir las fechas a lista ordenada para la respuesta
+	    List<String> dateTimestamps = new ArrayList<>(availability.keySet());
 
-	    AvailabilityResponse response = new AvailabilityResponse(dateTimestamps, sortedAvailability);
+	    AvailabilityResponse response = new AvailabilityResponse(dateTimestamps, availability);
 	    return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
-	private boolean isSlotAvailable(Long barberId, LocalDateTime slotDateTime) {
-	    List<Appointment> appointments = appointmentRepository.findByBarber_IdUser(barberId);
-	    for (Appointment appointment : appointments) {
-	        if (appointment.getAppointmentTime().equals(slotDateTime) && (appointment.getStatus().getIdStatus().equals(1l) || appointment.getStatus().getIdStatus().equals(4l))) {
-	        	return false;
-	        }
-	       
-	    }
-
-	    return true;
-	}
 
 
 }

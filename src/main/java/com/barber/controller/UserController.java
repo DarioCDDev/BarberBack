@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -204,7 +205,6 @@ public class UserController {
 
 	@GetMapping("/public/resendcode")
 	public ResponseEntity<?> resendCode(@RequestParam String email) {
-		System.out.println(email);
 
 		User user = userRepository.findByEmail(email)
 				.orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
@@ -221,7 +221,7 @@ public class UserController {
 
 			return ResponseEntity.ok(response);
 
-		} catch (Exception e) {
+		} catch (MailException  e) {
 			return ResponseEntity.badRequest().body("Código de verificación incorrecto.");
 		}
 
